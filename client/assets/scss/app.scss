@@ -3,13 +3,14 @@
 .canvas {
   font: 10px sans-serif;
   background-color: $bgcolor;
-  width: 800px;
-  height: 800px;
+  width: 500px;
+  height: 500px;
 }
 
 .dot {
   fill: $color;
-  stroke: black;
+  stroke: #111010;
+  stroke-width: 0.3;
 }
 
 #webpack-img {

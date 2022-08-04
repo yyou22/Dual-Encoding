@@ -5,6 +5,8 @@
   background-color: $bgcolor;
   width: 500px;
   height: 500px;
+  outline: $outcolor 10px solid;
+  z-index: -1;
 }
 
 .dot {

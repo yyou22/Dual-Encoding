@@ -28,7 +28,7 @@ $(document).ready(function() {
 
     var w = 500, h = 500
 
-    d3.csv('/data/data.csv', function(d, i) {
+    d3.csv('/data/data0.csv', function(d, i) {
         // convert to numerical values
         d.x = +d.xposp
     	d.y = +d.yposp
@@ -69,7 +69,11 @@ $(document).ready(function() {
 
     d3.select("#trans1").on("click", function() {
 
-        d3.csv('/data/data1.csv', function(d, i) {
+        var slider = document.getElementById('slider1');
+        var perturb_filename = String(slider.value);
+        var filename = '/data/data' + perturb_filename + '.csv';
+
+        d3.csv(filename, function(d, i) {
             // convert to numerical values
             d.x = +d.xposp
         	d.y = +d.yposp

@@ -1,19 +1,19 @@
 import './assets/scss/app.scss'
 
+import * as scatter_utils from './scatter_utils.js';
+
 var $ = require('jquery')
 var d3 = require('d3')
 
 var map_ = ['#f48382', '#f8bd61', '#ece137', '#c3c580', '#82a69a', '#80b2c5', '#8088c5', '#a380c5', '#c77bab', '#9a9494'];
 var perturb = ['None', '0.01', '0.02', '0.03'];
+var k = 1.0;
+var translateVar = [0, 0];
 
 // create dummy pie data for angle degrees
 var pie_data = {a: 50, b:50}
 
-var drawArc = d3.arc()
-                .innerRadius(0)
-                .outerRadius(6.6)
-                .startAngle(0.5)
-                .endAngle(0.5+Math.PI);
+var canvas = d3.select('.canvas');
 
 $('#slider1').on('input', e => $('span').text(perturb[e.target.value]));
 
@@ -22,11 +22,50 @@ $(document).ready(function() {
     var x1 = d3.scaleLinear()
         .domain([0, 1.0])
         .range([50, 450])
+
     var y1 = d3.scaleLinear()
             .domain([0, 1.0])
             .range([50, 450])
 
-    var w = 500, h = 500
+    var x2 = d3.scaleLinear()
+            .domain([0, 1.0])
+            .range([0, 500])
+
+    var y2 = d3.scaleLinear()
+            .domain([0, 1.0])
+            .range([0, 500])
+
+    const gGrid = canvas.append("g");
+
+    var zoom = d3.zoom()
+                .scaleExtent([0.5, 100])
+                .on("zoom", function () {
+                    k = d3.event.transform.k;
+                    translateVar[0] = d3.event.transform.x;
+                    translateVar[1] = d3.event.transform.y;
+
+                    //move circles around
+                    canvas.selectAll('.container_').attr("transform", d3.zoomTransform(this))
+
+                    //maintain size ratio
+                    canvas.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
+                    canvas.selectAll('.arc').attr('d', scatter_utils.drawArc(6.6, k))
+
+                    //hover feature
+                    canvas.selectAll('.circle_group')
+                        .on("mouseover", function(d, i) {
+                            scatter_utils.hoverCir(d3.select(this), k);
+                        })
+                        .on("mouseout", function(d, i) {
+                            scatter_utils.unhoverCir(d3.select(this), k);
+                        })
+
+                    const gGrid = canvas.select("g");
+                    const zx = d3.event.transform.rescaleX(x2).interpolate(d3.interpolateRound);
+                    const zy = d3.event.transform.rescaleY(y2).interpolate(d3.interpolateRound);
+                    gGrid.call(scatter_utils.grid(), zx, zy);
+
+                })
 
     d3.csv('/data/data0.csv', function(d, i) {
         // convert to numerical values
@@ -38,33 +77,47 @@ $(document).ready(function() {
 
         return d
     }).then(function(data) {
-        // Your d3 drawing code comes here
-        // The below example draws a simple "scatterplot"
 
-        var s = d3.select('.canvas')
-            .selectAll()
-            .data(data)
-            .enter()
-            .append('svg')
-            .append('g')
-            .attr('class', 'circle_group')
-            .attr("transform", function(d) {
-                return "translate(" + x1(d.x)  + "," + y1(d.y)  + ")"
-            });
+        gGrid.call(scatter_utils.grid(), x2, y2);
+
+        var s = canvas.selectAll()
+                    .data(data)
+                    .enter()
+                    .append('g')
+                    .attr('class', 'container_')
+                    .append('svg')
+                    .append('g')
+                    .attr('class', 'circle_group')
+                    .attr("transform", function(d) {
+                        return "translate(" + x1(d.x)  + "," + y1(d.y)  + ")"
+                    });
 
         s.append('circle')
             .attr('class', 'dot')
-            .attr('r', 7)
+            .attr('r', 7/k)
+            .attr('stroke-width', 0.3/k)
             .style("fill", function(d) {
                     return map_[d.target];
                 })
 
-        var arc = s.append("path")
-                    .style("fill", function(d) {
-                        return map_[d.pred];
-                    })
-                    .attr('class', 'arc')
-                    .attr('d', drawArc);
+        s.append("path")
+            .style("fill", function(d) {
+                return map_[d.pred];
+            })
+            .attr('class', 'arc')
+            .attr('d', scatter_utils.drawArc(6.6, k));
+
+        //hover feature
+        canvas.selectAll('.circle_group')
+            .on("mouseover", function(d, i) {
+                scatter_utils.hoverCir(d3.select(this), k);
+            })
+            .on("mouseout", function(d, i) {
+                scatter_utils.unhoverCir(d3.select(this), k);
+            })
+
+        canvas.call(zoom);
+
     })
 
     d3.select("#trans1").on("click", function() {
@@ -84,19 +137,16 @@ $(document).ready(function() {
             return d
         }).then(function(data) {
 
-            d3.select('.canvas')
-                .selectAll('.circle_group')
+            canvas.selectAll('.circle_group')
                 .data(data)
                 .enter();
 
-            d3.select('.canvas')
-                .selectAll('.arc')
+            canvas.selectAll('.arc')
                 .data(data)
                 .enter();
 
             //move svg groups
-            d3.select('.canvas')
-                .selectAll('.circle_group')
+            canvas.selectAll('.circle_group')
                 .transition()
                 .ease(d3.easeSin)
                 .duration(600)
@@ -104,8 +154,7 @@ $(document).ready(function() {
                     return "translate(" + x1(d.x)  + "," + y1(d.y)  + ")";
                 });
 
-            d3.select('.canvas')
-                .selectAll('.arc')
+            canvas.selectAll('.arc')
                 .transition()
                 .ease(d3.easeSin)
                 .duration(600)

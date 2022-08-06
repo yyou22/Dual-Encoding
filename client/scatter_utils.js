@@ -65,3 +65,54 @@ export function grid(g, x, y){
     return grid;
 
 }
+
+export function adjust_zoom_hover(canvas, k){
+
+    //maintain size ratio
+    canvas.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
+    canvas.selectAll('.arc').attr('d', drawArc(6.6, k))
+
+    canvas.selectAll('.circle_group')
+        .on("mouseover", function(d, i) {
+            hoverCir(d3.select(this), k);
+        })
+        .on("mouseout", function(d, i) {
+            unhoverCir(d3.select(this), k);
+        })
+
+}
+
+export function adjust_zoom_grid(canvas, x2, y2){
+
+    const gGrid = canvas.select("g");
+    const zx = d3.event.transform.rescaleX(x2).interpolate(d3.interpolateRound);
+    const zy = d3.event.transform.rescaleY(y2).interpolate(d3.interpolateRound);
+    gGrid.call(grid(), zx, zy);
+
+}
+
+export function textbox(g, d, i) {
+
+        //add textbox
+        g.append("rect")
+            .attr("id", "r" + i)
+            .attr('x', function() {
+                return d3.mouse(this)[0] + 10;
+            })
+            .attr('y', function() {
+                return d3.mouse(this)[1] - 85;
+            })
+            .attr("height", 70)
+            .attr("width", function() {
+                if (d.target == 0 || d.pred == 0) {
+                    return 150;
+                }
+                if (d.target == 1 || d.pred == 1) {
+                    return 170;
+                }
+                return 120;
+            })
+            .attr("fill", "#fef7f3")
+            .attr("stroke", "#a5a4a3")
+
+}

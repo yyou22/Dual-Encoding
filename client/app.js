@@ -13,7 +13,7 @@ var translateVar = [0, 0];
 // create dummy pie data for angle degrees
 var pie_data = {a: 50, b:50}
 
-var canvas = d3.select('.canvas');
+var canvas1 = d3.select('.canvas1');
 
 $('#slider1').on('input', e => $('span').text(perturb[e.target.value]));
 
@@ -35,7 +35,7 @@ $(document).ready(function() {
             .domain([0, 1.0])
             .range([0, 500])
 
-    const gGrid = canvas.append("g");
+    const gGrid = canvas1.append("g");
 
     var zoom = d3.zoom()
                 .scaleExtent([0.5, 100])
@@ -45,25 +45,11 @@ $(document).ready(function() {
                     translateVar[1] = d3.event.transform.y;
 
                     //move circles around
-                    canvas.selectAll('.container_').attr("transform", d3.zoomTransform(this))
-
-                    //maintain size ratio
-                    canvas.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
-                    canvas.selectAll('.arc').attr('d', scatter_utils.drawArc(6.6, k))
-
+                    canvas1.selectAll('.container_').attr("transform", d3.zoomTransform(this))
                     //hover feature
-                    canvas.selectAll('.circle_group')
-                        .on("mouseover", function(d, i) {
-                            scatter_utils.hoverCir(d3.select(this), k);
-                        })
-                        .on("mouseout", function(d, i) {
-                            scatter_utils.unhoverCir(d3.select(this), k);
-                        })
-
-                    const gGrid = canvas.select("g");
-                    const zx = d3.event.transform.rescaleX(x2).interpolate(d3.interpolateRound);
-                    const zy = d3.event.transform.rescaleY(y2).interpolate(d3.interpolateRound);
-                    gGrid.call(scatter_utils.grid(), zx, zy);
+                    scatter_utils.adjust_zoom_hover(canvas1, k);
+                    //adjust grid
+                    scatter_utils.adjust_zoom_grid(canvas1, x2, y2);
 
                 })
 
@@ -80,7 +66,7 @@ $(document).ready(function() {
 
         gGrid.call(scatter_utils.grid(), x2, y2);
 
-        var s = canvas.selectAll()
+        var s = canvas1.selectAll()
                     .data(data)
                     .enter()
                     .append('g')
@@ -108,7 +94,7 @@ $(document).ready(function() {
             .attr('d', scatter_utils.drawArc(6.6, k));
 
         //hover feature
-        canvas.selectAll('.circle_group')
+        canvas1.selectAll('.circle_group')
             .on("mouseover", function(d, i) {
                 scatter_utils.hoverCir(d3.select(this), k);
             })
@@ -116,7 +102,7 @@ $(document).ready(function() {
                 scatter_utils.unhoverCir(d3.select(this), k);
             })
 
-        canvas.call(zoom);
+        canvas1.call(zoom);
 
     })
 
@@ -137,16 +123,16 @@ $(document).ready(function() {
             return d
         }).then(function(data) {
 
-            canvas.selectAll('.circle_group')
+            canvas1.selectAll('.circle_group')
                 .data(data)
                 .enter();
 
-            canvas.selectAll('.arc')
+            canvas1.selectAll('.arc')
                 .data(data)
                 .enter();
 
             //move svg groups
-            canvas.selectAll('.circle_group')
+            canvas1.selectAll('.circle_group')
                 .transition()
                 .ease(d3.easeSin)
                 .duration(600)
@@ -154,7 +140,7 @@ $(document).ready(function() {
                     return "translate(" + x1(d.x)  + "," + y1(d.y)  + ")";
                 });
 
-            canvas.selectAll('.arc')
+            canvas1.selectAll('.arc')
                 .transition()
                 .ease(d3.easeSin)
                 .duration(600)

@@ -7,13 +7,17 @@ var d3 = require('d3')
 
 var map_ = ['#f48382', '#f8bd61', '#ece137', '#c3c580', '#82a69a', '#80b2c5', '#8088c5', '#a380c5', '#c77bab', '#9a9494'];
 var perturb = ['None', '0.01', '0.02', '0.03'];
+const label_ = ['Airplane', 'Automobile', 'Bird', 'Cat', 'Deer', 'Dog', 'Frog', 'Horse', 'Ship', 'Truck']
 var k = 1.0;
 var translateVar = [0, 0];
+
+export {label_}
 
 // create dummy pie data for angle degrees
 var pie_data = {a: 50, b:50}
 
-var canvas1 = d3.select('.canvas1');
+const canvas = d3.select('.canvas');
+const canvas1 = d3.select('.canvas1');
 
 $('#slider1').on('input', e => $('span').text(perturb[e.target.value]));
 
@@ -97,12 +101,27 @@ $(document).ready(function() {
         canvas1.selectAll('.circle_group')
             .on("mouseover", function(d, i) {
                 scatter_utils.hoverCir(d3.select(this), k);
+                scatter_utils.textbox(canvas, d, i);
+            })
+            .on("mousemove", function(d, i) {
+                scatter_utils.textbox(canvas, d, i);
             })
             .on("mouseout", function(d, i) {
                 scatter_utils.unhoverCir(d3.select(this), k);
+                //remove textbox
+                scatter_utils.remove_textbox();
             })
 
         canvas1.call(zoom);
+
+    })
+
+    //reset button
+    d3.select("#reset1").on("click", function() {
+
+        canvas1.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
 
     })
 

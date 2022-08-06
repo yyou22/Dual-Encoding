@@ -1,5 +1,7 @@
 var d3 = require('d3')
 
+import {label_} from './app.js'
+
 export function drawArc(r_, k){
 
     var drawArc = d3.arc()
@@ -72,12 +74,18 @@ export function adjust_zoom_hover(canvas, k){
     canvas.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
     canvas.selectAll('.arc').attr('d', drawArc(6.6, k))
 
+    //FIXME: could possibly be combined
     canvas.selectAll('.circle_group')
         .on("mouseover", function(d, i) {
             hoverCir(d3.select(this), k);
+            textbox(canvas, d, i);
+        })
+        .on("mousemove", function(d, i) {
+            textbox(canvas, d, i);
         })
         .on("mouseout", function(d, i) {
             unhoverCir(d3.select(this), k);
+            remove_textbox();
         })
 
 }
@@ -91,28 +99,31 @@ export function adjust_zoom_grid(canvas, x2, y2){
 
 }
 
-export function textbox(g, d, i) {
+var tooltip = d3.select('.canvas').append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0)
+                .attr("id", "textbox")
+                .style("background-color", "white")
+                .style("position", "absolute")
+                .style("border", "solid")
+                .style("border-width", "1.5px")
+                .style("border-radius", "5px")
+                .style("border-color", "#a5a4a3")
+                .style("padding", "5px")
+                .style("font-family", "Courier")
+                .style("font-size", "15px")
 
-        //add textbox
-        g.append("rect")
-            .attr("id", "r" + i)
-            .attr('x', function() {
-                return d3.mouse(this)[0] + 10;
-            })
-            .attr('y', function() {
-                return d3.mouse(this)[1] - 85;
-            })
-            .attr("height", 70)
-            .attr("width", function() {
-                if (d.target == 0 || d.pred == 0) {
-                    return 150;
-                }
-                if (d.target == 1 || d.pred == 1) {
-                    return 170;
-                }
-                return 120;
-            })
-            .attr("fill", "#fef7f3")
-            .attr("stroke", "#a5a4a3")
+export function textbox(g, d, i){
+
+    tooltip.html("Instance #" + String(i) + "<br>Label: " + label_[d.target] + "<br>Pred.: " + label_[d.pred])
+            .style("left", (d3.event.pageX + "px"))
+            .style("top", (d3.event.pageY - 170 + "px"))
+            .style("opacity", 1)
+
+}
+
+export function remove_textbox(){
+
+    tooltip.style("opacity", 0);
 
 }

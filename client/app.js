@@ -92,6 +92,7 @@ $(document).ready(function() {
                 .attr("stroke", map_[i])
                 .attr("stroke-opacity", 0.3)
                 .attr("stroke-linejoin", "round")
+                .style("opacity", 0)
 
         }
 

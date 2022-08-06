@@ -73,6 +73,7 @@ export function adjust_zoom_hover(canvas, k){
     //maintain size ratio
     canvas.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
     canvas.selectAll('.arc').attr('d', drawArc(6.6, k))
+    canvas.selectAll('.contour').attr("stroke-width", 1.0/k)
 
     //FIXME: could possibly be combined
     canvas.selectAll('.circle_group')

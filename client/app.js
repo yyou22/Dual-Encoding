@@ -6,6 +6,7 @@ var $ = require('jquery')
 var d3 = require('d3')
 
 var map_ = ['#f48382', '#f8bd61', '#ece137', '#c3c580', '#82a69a', '#80b2c5', '#8088c5', '#a380c5', '#c77bab', '#9a9494'];
+var map_contour = ['#f48382', '#f8bd61', '#ece137', '#c3c580', '#82a69a', '#80b2c5', '#8088c5', '#a380c5', '#c77bab', '#9a9494'];
 var perturb = ['None', '0.01', '0.02', '0.03'];
 const label_ = ['Airplane', 'Automobile', 'Bird', 'Cat', 'Deer', 'Dog', 'Frog', 'Horse', 'Ship', 'Truck']
 var k = 1.0;
@@ -48,8 +49,8 @@ $(document).ready(function() {
                     translateVar[0] = d3.event.transform.x;
                     translateVar[1] = d3.event.transform.y;
 
-                    //move circles around
-                    canvas1.selectAll('.container_').attr("transform", d3.zoomTransform(this))
+                    //move circles and contours around
+                    canvas1.selectAll('.container_,.contour').attr("transform", d3.zoomTransform(this))
                     //hover feature
                     scatter_utils.adjust_zoom_hover(canvas1, k);
                     //adjust grid
@@ -68,6 +69,33 @@ $(document).ready(function() {
         return d
     }).then(function(data) {
 
+        for (let i = 0; i < 10; i++) {
+
+            // compute the density data
+            var densityData = d3.contourDensity()
+                                .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
+                                .y(function(d) { return y1(d.y); })
+                                .size([500, 500])  // smaller = more precision in lines = more lines
+                                .thresholds([0.005])
+                                (data.filter(function(d) { return d.pred == i;}))
+
+            // Add the contour: several "path"
+            canvas1.selectAll()
+                .data(densityData)
+                .enter()
+                .append("path")
+                .attr("class", "contour")
+                .attr("id", "contour" + i)
+                .attr("d", d3.geoPath())
+                .attr("fill", map_[i])
+                .attr("fill-opacity", 0.1)
+                .attr("stroke", map_[i])
+                .attr("stroke-opacity", 0.3)
+                .attr("stroke-linejoin", "round")
+
+        }
+
+        //call grid
         gGrid.call(scatter_utils.grid(), x2, y2);
 
         var s = canvas1.selectAll()
@@ -125,6 +153,24 @@ $(document).ready(function() {
 
     })
 
+    //contour button
+    d3.select("#contour_button").on("click", function() {
+
+        if (canvas1.selectAll('.contour').style("opacity") == 1){
+            canvas1.selectAll('.contour')
+                .transition()
+                .duration(300)
+                .style("opacity", 0);
+        }
+        else if (canvas1.selectAll('.contour').style("opacity") == 0){
+            canvas1.selectAll('.contour')
+                .transition()
+                .duration(300)
+                .style("opacity", 1);
+        }
+
+    })
+
     d3.select("#trans1").on("click", function() {
 
         var slider = document.getElementById('slider1');
@@ -141,6 +187,26 @@ $(document).ready(function() {
 
             return d
         }).then(function(data) {
+
+            //testing contour
+            for (let i = 0; i < 10; i++) {
+
+                // compute the density data
+                var densityData = d3.contourDensity()
+                                    .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
+                                    .y(function(d) { return y1(d.y); })
+                                    .size([500, 500])  // smaller = more precision in lines = more lines
+                                    .thresholds([0.005])
+                                    (data.filter(function(d) { return d.pred == i;}))
+
+                // Add the contour: several "path"
+                canvas1.selectAll("contour")
+                    .data(densityData)
+                    .enter()
+                    .select("#contour" + i)
+                    .attr("d", d3.geoPath())
+
+            }
 
             canvas1.selectAll('.circle_group')
                 .data(data)

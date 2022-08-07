@@ -11,6 +11,7 @@ var perturb = ['None', '0.01', '0.02', '0.03'];
 const label_ = ['Airplane', 'Automobile', 'Bird', 'Cat', 'Deer', 'Dog', 'Frog', 'Horse', 'Ship', 'Truck']
 var k = 1.0;
 var translateVar = [0, 0];
+var contour_on = 0;
 
 export {label_}
 
@@ -94,6 +95,7 @@ $(document).ready(function() {
                 .attr("stroke-opacity", 0.5)
                 .attr("stroke-linejoin", "round")
                 .style("opacity", 0)
+                .attr("transform", "translate(0,0)");
 
         }
 
@@ -162,12 +164,14 @@ $(document).ready(function() {
     d3.select("#contour_button").on("click", function() {
 
         if (canvas1.selectAll('.contour').style("opacity") == 1){
+            contour_on = 0
             canvas1.selectAll('.contour')
                 .transition()
                 .duration(300)
                 .style("opacity", 0);
         }
         else if (canvas1.selectAll('.contour').style("opacity") == 0){
+            contour_on = 1
             canvas1.selectAll('.contour')
                 .transition()
                 .duration(300)
@@ -205,28 +209,35 @@ $(document).ready(function() {
                                     .thresholds([0.005])
                                     (data.filter(function(d) { return d.pred == i;}))
 
-                const contour = document.getElementsByClassName('contour');
-
-                const temp_contour = canvas1
-                                        .selectAll("contour")
-                                        .data(densityData)
-                                        .enter()
-                                        .append("path")
-                                        .attr('id','temp_contour')
-                                        .attr('visibility', 'hidden')
-                                        .attr("d", d3.geoPath())
-
-                // Add the contour: several "path"
-                canvas1.selectAll("contour")
+                canvas1.selectAll()
                     .data(densityData)
                     .enter()
-                    .select("#contour" + i)
+                    .append("path")
+                    .attr("class", "temp_contour")
+                    .attr("id", "contour" + i)
+                    .attr("d", d3.geoPath())
+                    .attr("fill", map_[i])
+                    .attr("fill-opacity", 0.2)
+                    .attr("stroke", map_[i])
+                    .attr("stroke-opacity", 0.5)
+                    .attr("stroke-linejoin", "round")
+                    .style("opacity", 0)
+                    .attr("transform", canvas1.select('.contour').style("transform"))
+                    .attr("stroke-width", 1.0/k)
+
+                canvas1.selectAll('.contour')
+                    .attr("id", "contour_remove")
                     .transition()
                     .duration(360)
-                    .attrTween("d", scatter_utils.pathTween(temp_contour.attr('d'), 4, contour[i]))
-                    //.attr("d", d3.geoPath())
+                    .style("opacity", 0)
+                    .on("end", function(){d3.select(this).remove();})
 
-                temp_contour.remove();
+                canvas1.selectAll('.temp_contour')
+                    .transition()
+                    .duration(360)
+                    .style("opacity", contour_on && 1)
+                    .on("end", function(){d3.select(this).attr("class", "contour");})
+
 
             }
 

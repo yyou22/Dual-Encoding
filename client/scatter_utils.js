@@ -152,3 +152,29 @@ export function pathTween(d1, precision, self) {
         };
     };
 }
+
+//original code for pathTween animation
+/*
+const contour = document.getElementsByClassName('contour');
+
+const temp_contour = canvas1
+                        .selectAll("contour")
+                        .data(densityData)
+                        .enter()
+                        .append("path")
+                        .attr('id','temp_contour')
+                        .attr('visibility', 'hidden')
+                        .attr("d", d3.geoPath())
+
+// Add the contour: several "path"
+canvas1.selectAll("contour")
+    .data(densityData)
+    .enter()
+    .select("#contour" + i)
+    .transition()
+    .duration(360)
+    .attr("d", d3.geoPath())
+    .attrTween("d", scatter_utils.pathTween(temp_contour.attr('d'), 4, contour[i]))
+
+temp_contour.remove();
+*/

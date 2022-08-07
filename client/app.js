@@ -88,9 +88,9 @@ $(document).ready(function() {
                 .attr("id", "contour" + i)
                 .attr("d", d3.geoPath())
                 .attr("fill", map_[i])
-                .attr("fill-opacity", 0.1)
+                .attr("fill-opacity", 0.2)
                 .attr("stroke", map_[i])
-                .attr("stroke-opacity", 0.3)
+                .attr("stroke-opacity", 0.5)
                 .attr("stroke-linejoin", "round")
                 .style("opacity", 0)
 
@@ -200,12 +200,28 @@ $(document).ready(function() {
                                     .thresholds([0.005])
                                     (data.filter(function(d) { return d.pred == i;}))
 
+                const contour = document.getElementsByClassName('contour');
+
+                const temp_contour = canvas1
+                                        .selectAll("contour")
+                                        .data(densityData)
+                                        .enter()
+                                        .append("path")
+                                        .attr('id','temp_contour')
+                                        .attr('visibility', 'hidden')
+                                        .attr("d", d3.geoPath())
+
                 // Add the contour: several "path"
                 canvas1.selectAll("contour")
                     .data(densityData)
                     .enter()
                     .select("#contour" + i)
-                    .attr("d", d3.geoPath())
+                    .transition()
+                    .duration(360)
+                    .attrTween("d", scatter_utils.pathTween(temp_contour.attr('d'), 4, contour[i]))
+                    //.attr("d", d3.geoPath())
+
+                temp_contour.remove();
 
             }
 

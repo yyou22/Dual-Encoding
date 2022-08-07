@@ -76,6 +76,7 @@ $(document).ready(function() {
                                 .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
                                 .y(function(d) { return y1(d.y); })
                                 .size([500, 500])  // smaller = more precision in lines = more lines
+                                .bandwidth(20)
                                 .thresholds([0.005])
                                 (data.filter(function(d) { return d.pred == i;}))
 
@@ -95,6 +96,9 @@ $(document).ready(function() {
                 .style("opacity", 0)
 
         }
+
+        //FIXME: testing brush
+        //canvas1.call(d3.brush());
 
         //call grid
         gGrid.call(scatter_utils.grid(), x2, y2);
@@ -197,6 +201,7 @@ $(document).ready(function() {
                                     .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
                                     .y(function(d) { return y1(d.y); })
                                     .size([500, 500])  // smaller = more precision in lines = more lines
+                                    .bandwidth(20)
                                     .thresholds([0.005])
                                     (data.filter(function(d) { return d.pred == i;}))
 

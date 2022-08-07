@@ -116,7 +116,7 @@ var tooltip = d3.select('.canvas').append("div")
 
 export function textbox(g, d, i){
 
-    tooltip.html("Instance #" + String(i) + "<br>Label: " + label_[d.target] + "<br>Pred.: " + label_[d.pred])
+    tooltip.html("Instance #" + String(i) + " <br>Label: " + label_[d.target] + " <br>Pred.: " + label_[d.pred] + " ")
             .style("left", (d3.event.pageX + "px"))
             .style("top", (d3.event.pageY - 170 + "px"))
             .style("opacity", 1)

@@ -1,7 +1,7 @@
 import './assets/scss/app.scss'
 import * as scatter_utils from './scatter_utils.js';
 
-//FIXME: might need to initialize all contours
+//FIXME: clicking a circle then attack
 
 var $ = require('jquery')
 var d3 = require('d3')
@@ -14,6 +14,7 @@ var k = 1.0;
 var translateVar = [0, 0];
 var contour_on = 0;
 var attack_button_on = 1;
+var cur_perturb = "0"
 
 var x1 = d3.scaleLinear()
     .domain([0, 1.0])
@@ -53,7 +54,7 @@ $(document).ready(function() {
                     translateVar[1] = d3.event.transform.y;
 
                     //move circles and contours around
-                    canvas1.selectAll('.container_,.contour').attr("transform", d3.zoomTransform(this))
+                    canvas1.selectAll('.container_,.contour,.dot_highlight').attr("transform", d3.zoomTransform(this))
                     //hover feature
                     scatter_utils.adjust_zoom_hover(canvas1, canvas, k, zoom);
                     //adjust grid
@@ -145,13 +146,14 @@ $(document).ready(function() {
 
     d3.select("#trans1").on("click", function() {
 
-        if (attack_button_on){
+        var slider = document.getElementById('slider1');
+        var perturb_filename = String(slider.value);
+        var filename = '/data/data' + perturb_filename + '.csv';
+
+        if (attack_button_on && cur_perturb != perturb_filename){
 
             attack_button_on = 0;
-
-            var slider = document.getElementById('slider1');
-            var perturb_filename = String(slider.value);
-            var filename = '/data/data' + perturb_filename + '.csv';
+            cur_perturb = perturb_filename;
 
             d3.csv(filename, function(d, i) {
                 // convert to numerical values
@@ -172,7 +174,7 @@ $(document).ready(function() {
                                         .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
                                         .y(function(d) { return y1(d.y); })
                                         .size([500, 500])  // smaller = more precision in lines = more lines
-                                        .bandwidth(10)
+                                        .bandwidth(20)
                                         .thresholds([0.005])
                                         (data.filter(function(d) { return d.pred == i;}))
 
@@ -202,7 +204,7 @@ $(document).ready(function() {
 
                     canvas1.selectAll('.temp_contour')
                         .transition()
-                        .delay(240)
+                        //.delay(240)
                         .duration(360)
                         .style("opacity", contour_on && 1)
                         .on("end", function(){d3.select(this).attr("class", "contour");})

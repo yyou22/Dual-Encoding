@@ -74,6 +74,8 @@ export function adjust_zoom_hover(canvas1, canvas, k, zoom){
     canvas1.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
     canvas1.selectAll('.arc').attr('d', drawArc(6.6, k))
     canvas1.selectAll('.contour').attr("stroke-width", 1.0/k)
+    canvas1.select('.cir_highlight').attr('r', 20/k).attr('stroke-width', 0.3/k)
+    canvas1.select('.arc_highlight').attr('d',drawArc(19.8, k))
 
     setCircleHover(canvas1, canvas, k, zoom);
 
@@ -131,6 +133,33 @@ export function setCircleHover(canvas1, canvas, k, zoom){
             remove_textbox();
         })
         .on("click", function(d, i) {
+
+            //obtain the properties of the circle we're trying to replicate
+            var trans_ = d3.select(this).attr("transform")
+            var cir_color = d3.select(this).select('.dot').style("fill")
+            var arc_color = d3.select(this).select('.arc').style("fill")
+
+            var dot_highlight = canvas1.append('g')
+                .attr('class', 'dot_highlight')
+                .append('svg')
+                .append('g')
+                .attr('class', 'highlight_group')
+                .attr('transform', String(trans_))
+
+            dot_highlight.append('circle')
+                .attr('class', 'cir_highlight')
+                .attr('r', 15/k)
+                .style("fill", cir_color)
+                .attr('stroke', '#111010')
+                .attr('stroke-width', 0.3/k)
+
+            dot_highlight.append("path")
+                .attr('class', 'arc_highlight')
+                .style("fill", arc_color)
+                .attr('d',drawArc(14.6, k))
+
+            dot_highlight.call(expandCir, d, i, k)
+
             var x = -x1(d.x) + 250/k;
             var y = -y1(d.y) + 250/k;
 
@@ -146,6 +175,20 @@ export function setCircleHover(canvas1, canvas, k, zoom){
 
 }
 
+var expandCir = function expandCircle(g, d, i, k) {
+
+    g.select('circle')
+        .transition()
+        .duration(200)
+        .attr('r', 20/k)
+
+    g.select('path')
+        .transition()
+        .duration(200)
+        .attr('d',drawArc(19.8, k))
+
+}
+
 export function initiateContour(canvas1, data) {
 
     for (let i = 0; i < 10; i++) {
@@ -155,7 +198,7 @@ export function initiateContour(canvas1, data) {
                             .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
                             .y(function(d) { return y1(d.y); })
                             .size([500, 500])  // smaller = more precision in lines = more lines
-                            .bandwidth(10)
+                            .bandwidth(20)
                             .thresholds([0.005])
                             (data.filter(function(d) { return d.pred == i;}))
 

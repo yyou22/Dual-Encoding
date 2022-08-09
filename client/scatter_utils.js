@@ -1,6 +1,6 @@
 var d3 = require('d3')
 
-import {label_} from './app.js'
+import {label_, x1, y1, map_} from './app.js'
 
 export function drawArc(r_, k){
 
@@ -68,26 +68,14 @@ export function grid(g, x, y){
 
 }
 
-export function adjust_zoom_hover(canvas, k){
+export function adjust_zoom_hover(canvas1, canvas, k, zoom){
 
     //maintain size ratio
-    canvas.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
-    canvas.selectAll('.arc').attr('d', drawArc(6.6, k))
-    canvas.selectAll('.contour').attr("stroke-width", 1.0/k)
+    canvas1.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
+    canvas1.selectAll('.arc').attr('d', drawArc(6.6, k))
+    canvas1.selectAll('.contour').attr("stroke-width", 1.0/k)
 
-    //FIXME: could possibly be combined
-    canvas.selectAll('.circle_group')
-        .on("mouseover", function(d, i) {
-            hoverCir(d3.select(this), k);
-            textbox(canvas, d, i);
-        })
-        .on("mousemove", function(d, i) {
-            textbox(canvas, d, i);
-        })
-        .on("mouseout", function(d, i) {
-            unhoverCir(d3.select(this), k);
-            remove_textbox();
-        })
+    setCircleHover(canvas1, canvas, k, zoom);
 
 }
 
@@ -127,7 +115,7 @@ export function remove_textbox(){
     tooltip.style("opacity", 0);
 }
 
-export function setCircleHover(canvas1, canvas, k){
+export function setCircleHover(canvas1, canvas, k, zoom){
 
     canvas1.selectAll('.circle_group')
         .on("mouseover", function(d, i) {
@@ -142,6 +130,53 @@ export function setCircleHover(canvas1, canvas, k){
             //remove textbox
             remove_textbox();
         })
+        .on("click", function(d, i) {
+            var x = -x1(d.x) + 250/k;
+            var y = -y1(d.y) + 250/k;
+
+            canvas1.transition()
+                .duration(600)
+                .ease(d3.easeBack)
+                .call(
+                    zoom.transform,
+                    d3.zoomIdentity.translate(0, 0).scale(k).translate(x, y)
+                );
+
+        })
+
+}
+
+export function initiateContour(canvas1, data) {
+
+    for (let i = 0; i < 10; i++) {
+
+        // compute the density data
+        var densityData = d3.contourDensity()
+                            .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
+                            .y(function(d) { return y1(d.y); })
+                            .size([500, 500])  // smaller = more precision in lines = more lines
+                            .bandwidth(10)
+                            .thresholds([0.005])
+                            (data.filter(function(d) { return d.pred == i;}))
+
+        // Add the contour: several "path"
+        canvas1.selectAll()
+            .data(densityData)
+            .enter()
+            .select(".contour_container")
+            .append("path")
+            .attr("class", "contour")
+            .attr("id", "contour" + i)
+            .attr("d", d3.geoPath())
+            .attr("fill", map_[i])
+            .attr("fill-opacity", 0.2)
+            .attr("stroke", map_[i])
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke-linejoin", "round")
+            .style("opacity", 0)
+            .attr("transform", "translate(0,0)");
+
+    }
 
 }
 

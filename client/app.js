@@ -1,5 +1,4 @@
 import './assets/scss/app.scss'
-
 import * as scatter_utils from './scatter_utils.js';
 
 var $ = require('jquery')
@@ -77,7 +76,7 @@ $(document).ready(function() {
                                 .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
                                 .y(function(d) { return y1(d.y); })
                                 .size([500, 500])  // smaller = more precision in lines = more lines
-                                .bandwidth(20)
+                                .bandwidth(10)
                                 .thresholds([0.005])
                                 (data.filter(function(d) { return d.pred == i;}))
 
@@ -85,6 +84,7 @@ $(document).ready(function() {
             canvas1.selectAll()
                 .data(densityData)
                 .enter()
+                .select(".contour_container")
                 .append("path")
                 .attr("class", "contour")
                 .attr("id", "contour" + i)
@@ -133,19 +133,7 @@ $(document).ready(function() {
             .attr('d', scatter_utils.drawArc(6.6, k));
 
         //hover feature
-        canvas1.selectAll('.circle_group')
-            .on("mouseover", function(d, i) {
-                scatter_utils.hoverCir(d3.select(this), k);
-                scatter_utils.textbox(canvas, d, i);
-            })
-            .on("mousemove", function(d, i) {
-                scatter_utils.textbox(canvas, d, i);
-            })
-            .on("mouseout", function(d, i) {
-                scatter_utils.unhoverCir(d3.select(this), k);
-                //remove textbox
-                scatter_utils.remove_textbox();
-            })
+        scatter_utils.setCircleHover(canvas1, canvas, k);
 
         canvas1.call(zoom);
 
@@ -205,13 +193,14 @@ $(document).ready(function() {
                                     .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
                                     .y(function(d) { return y1(d.y); })
                                     .size([500, 500])  // smaller = more precision in lines = more lines
-                                    .bandwidth(20)
+                                    .bandwidth(10)
                                     .thresholds([0.005])
                                     (data.filter(function(d) { return d.pred == i;}))
 
                 canvas1.selectAll()
                     .data(densityData)
                     .enter()
+                    .select(".contour_container")
                     .append("path")
                     .attr("class", "temp_contour")
                     .attr("id", "contour" + i)
@@ -234,10 +223,10 @@ $(document).ready(function() {
 
                 canvas1.selectAll('.temp_contour')
                     .transition()
+                    .delay(240)
                     .duration(360)
                     .style("opacity", contour_on && 1)
                     .on("end", function(){d3.select(this).attr("class", "contour");})
-
 
             }
 

@@ -127,6 +127,24 @@ export function remove_textbox(){
     tooltip.style("opacity", 0);
 }
 
+export function setCircleHover(canvas1, canvas, k){
+
+    canvas1.selectAll('.circle_group')
+        .on("mouseover", function(d, i) {
+            hoverCir(d3.select(this), k);
+            textbox(canvas, d, i);
+        })
+        .on("mousemove", function(d, i) {
+            textbox(canvas, d, i);
+        })
+        .on("mouseout", function(d, i) {
+            unhoverCir(d3.select(this), k);
+            //remove textbox
+            remove_textbox();
+        })
+
+}
+
 export function pathTween(d1, precision, self) {
 
     return function() {

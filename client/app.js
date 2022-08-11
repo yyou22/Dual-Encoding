@@ -166,50 +166,7 @@ $(document).ready(function() {
                 return d
             }).then(function(data) {
 
-                //testing contour
-                for (let i = 0; i < 10; i++) {
-
-                    // compute the density data
-                    var densityData = d3.contourDensity()
-                                        .x(function(d) { return x1(d.x); })   // x and y = column name in .csv input data
-                                        .y(function(d) { return y1(d.y); })
-                                        .size([500, 500])  // smaller = more precision in lines = more lines
-                                        .bandwidth(20)
-                                        .thresholds([0.005])
-                                        (data.filter(function(d) { return d.pred == i;}))
-
-                    canvas1.selectAll()
-                        .data(densityData)
-                        .enter()
-                        .select(".contour_container")
-                        .append("path")
-                        .attr("class", "temp_contour")
-                        .attr("id", "contour" + i)
-                        .attr("d", d3.geoPath())
-                        .attr("fill", map_[i])
-                        .attr("fill-opacity", 0.2)
-                        .attr("stroke", map_[i])
-                        .attr("stroke-opacity", 0.5)
-                        .attr("stroke-linejoin", "round")
-                        .style("opacity", 0)
-                        .attr("transform", canvas1.select('.contour').style("transform"))
-                        .attr("stroke-width", 1.0/k)
-
-                    canvas1.selectAll('.contour')
-                        .attr("id", "contour_remove")
-                        .transition()
-                        .duration(360)
-                        .style("opacity", 0)
-                        .on("end", function(){d3.select(this).remove();})
-
-                    canvas1.selectAll('.temp_contour')
-                        .transition()
-                        //.delay(240)
-                        .duration(360)
-                        .style("opacity", contour_on && 1)
-                        .on("end", function(){d3.select(this).attr("class", "contour");})
-
-                }
+                scatter_utils.changeContour(canvas1, data, k, contour_on);
 
                 canvas1.selectAll('.circle_group')
                     .data(data)

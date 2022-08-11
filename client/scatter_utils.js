@@ -146,6 +146,7 @@ export function setCircleHover(canvas1, canvas, k, zoom){
                 .append('svg')
                 .append('g')
                 .attr('class', 'highlight_group')
+                .attr('idx', i)
                 .attr('transform', String(trans_))
 
             dot_highlight.append('circle')
@@ -188,6 +189,46 @@ var expandCir = function expandCircle(g, d, i, k) {
         .transition()
         .duration(200)
         .attr('d',drawArc(19.8, k))
+        .on('end', function() {
+
+            g.on('mouseover', function() {
+                textbox(d3.select('.canvas'), d, i);
+            })
+            .on('mousemove', function() {
+                textbox(d3.select('.canvas'), d, i);
+            })
+            .on('mouseout', function() {
+                remove_textbox();
+            })
+
+        })
+
+}
+
+export function removeHighlight(canvas1, data, k) {
+
+    canvas1.select(".highlight_group")
+        .transition()
+        .duration(600)
+        .attr("transform", function(d) {
+            return "translate(" + x1(data[d3.select(this).attr('idx')].x)  + "," + y1(data[d3.select(this).attr('idx')].y)  + ")";
+        })
+        .on('end', function(){
+            canvas1.select(".dot_highlight").remove();
+        })
+
+    canvas1.select('.cir_highlight')
+        .transition()
+        .duration(200)
+        .attr('r', 0.1/k)
+        .attr('stroke-width', 0.1/k)
+        .style("opacity", 0)
+
+    canvas1.select('.arc_highlight')
+        .transition()
+        .duration(200)
+        .attr('d', drawArc(0.1, k))
+        .style("opacity", 0)
 
 }
 

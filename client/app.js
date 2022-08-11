@@ -167,6 +167,7 @@ $(document).ready(function() {
             }).then(function(data) {
 
                 scatter_utils.changeContour(canvas1, data, k, contour_on);
+                scatter_utils.removeHighlight(canvas1, data, k);
 
                 canvas1.selectAll('.circle_group')
                     .data(data)

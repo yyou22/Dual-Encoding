@@ -139,6 +139,8 @@ export function setCircleHover(canvas1, canvas, k, zoom){
         })
         .on("click", function(d, i) {
 
+            remove_textbox();//for safari
+
             canvas1.select(".dot_highlight").remove();
 
             //obtain the properties of the circle we're trying to replicate
@@ -241,14 +243,14 @@ export function removeHighlight(canvas1, data, k) {
 
     canvas1.select('.cir_highlight')
         .transition()
-        .duration(200)
+        .duration(600)
         .attr('r', 0.1/k)
         .attr('stroke-width', 0.1/k)
         .style("opacity", 0)
 
     canvas1.select('.arc_highlight')
         .transition()
-        .duration(200)
+        .duration(600)
         .attr('d', drawArc(0.1, k))
         .style("opacity", 0)
 
@@ -288,7 +290,7 @@ export function initiateContour(canvas1, data) {
 
 }
 
-export function changeContour(canvas1, data, k, contour_on){
+export function loadContour(canvas1, data, k, contour_on){
 
     //testing contour
     for (let i = 0; i < 10; i++) {
@@ -316,24 +318,28 @@ export function changeContour(canvas1, data, k, contour_on){
             .attr("stroke-opacity", 0.5)
             .attr("stroke-linejoin", "round")
             .style("opacity", 0)
-            .attr("transform", canvas1.select('.contour').style("transform"))
+            .attr("transform", canvas1.select('.contour').attr("transform"))
             .attr("stroke-width", 1.0/k)
-
-        canvas1.selectAll('.contour')
-            .attr("id", "contour_remove")
-            .transition()
-            .duration(360)
-            .style("opacity", 0)
-            .on("end", function(){d3.select(this).remove();})
-
-        canvas1.selectAll('.temp_contour')
-            .transition()
-            //.delay(240)
-            .duration(360)
-            .style("opacity", contour_on && 1)
-            .on("end", function(){d3.select(this).attr("class", "contour");})
-
     }
+
+}
+
+//separated from loadContour for safari
+export function changeContour(canvas1, contour_on) {
+
+    canvas1.selectAll('.contour')
+        .attr("id", "contour_remove")
+        .transition()
+        .duration(360)
+        .style("opacity", 0)
+        .on("end", function(){d3.select(this).remove();})
+
+    canvas1.selectAll('.temp_contour')
+        .transition()
+        //.delay(240)
+        .duration(360)
+        .style("opacity", contour_on && 1)
+        .on("end", function(){d3.select(this).attr("class", "contour");})
 
 }
 

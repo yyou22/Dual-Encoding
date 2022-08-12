@@ -1,6 +1,6 @@
 var d3 = require('d3')
 
-import {label_, x1, y1, map_} from './app.js'
+import {label_, x1, y1, map_, k} from './app.js'
 
 export function drawArc(r_, k){
 
@@ -74,8 +74,13 @@ export function adjust_zoom_hover(canvas1, canvas, k, zoom){
     canvas1.selectAll('.dot').attr('r', 7/k).attr('stroke-width', 0.3/k)
     canvas1.selectAll('.arc').attr('d', drawArc(6.6, k))
     canvas1.selectAll('.contour').attr("stroke-width", 1.0/k)
-    canvas1.select('.cir_highlight').attr('r', 20/k).attr('stroke-width', 0.3/k)
-    canvas1.select('.arc_highlight').attr('d',drawArc(19.8, k))
+
+    canvas1.select('.cir_highlight')
+        .attr('r', 20/k)
+        .attr('stroke-width', 0.3/k)
+
+    canvas1.select('.arc_highlight')
+        .attr('d',drawArc(19.8, k))
 
     setCircleHover(canvas1, canvas, k, zoom);
 
@@ -161,7 +166,7 @@ export function setCircleHover(canvas1, canvas, k, zoom){
                 .style("fill", arc_color)
                 .attr('d',drawArc(14.6, k))
 
-            dot_highlight.call(expandCir, d, i, k)
+            dot_highlight.call(expandCir, d, i)
 
             var x = -x1(d.x) + 250/k;
             var y = -y1(d.y) + 250/k;
@@ -178,7 +183,7 @@ export function setCircleHover(canvas1, canvas, k, zoom){
 
 }
 
-var expandCir = function expandCircle(g, d, i, k) {
+var expandCir = function expandCircle(g, d, i) {
 
     g.select('circle')
         .transition()
@@ -193,12 +198,29 @@ var expandCir = function expandCircle(g, d, i, k) {
 
             g.on('mouseover', function() {
                 textbox(d3.select('.canvas'), d, i);
+
+                //hovering circle enlarges it
+                g.select('.cir_highlight').transition("mousehover")
+                    .duration(60)
+                    .attr("r", 25/k)
+
+                g.select('.arc_highlight').transition("mousehover")
+                    .duration(60)
+                    .attr('d', drawArc(24.8, k));
             })
             .on('mousemove', function() {
                 textbox(d3.select('.canvas'), d, i);
             })
             .on('mouseout', function() {
                 remove_textbox();
+                //reset circle size
+                g.select('.cir_highlight').transition("mousehover")
+                    .duration(60)
+                    .attr("r", 20/k)
+
+                g.select('.arc_highlight').transition("mousehover")
+                    .duration(60)
+                    .attr('d', drawArc(19.8, k));
             })
 
         })

@@ -32,7 +32,7 @@ var y2 = d3.scaleLinear()
         .domain([0, 1.0])
         .range([0, 500])
 
-export {label_, x1, y1, map_}
+export {label_, x1, y1, map_, k}
 
 // create dummy pie data for angle degrees
 var pie_data = {a: 50, b:50}
